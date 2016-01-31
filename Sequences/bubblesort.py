@@ -15,8 +15,8 @@ class bubble_sort:
 
     if main: print "start:", result
 
-    swapped = False
     for i in range(len(result)-1):
+      swapped = False
       for j in range (len(result)-1-i):
         steps += 1
         if result[j] > result[j+1]:
