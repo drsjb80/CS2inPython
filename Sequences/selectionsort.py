@@ -1,32 +1,32 @@
 import unittest
 import random
 
-main = __name__ == "__main__"
+main = "__main__" == __name__
 
 class selection_sort:
   def sort(self, a):
     if not a: return a
-    if len(a) == 1: return a
-    if main: print a
+    if 1 == len(a): return a
+    if main: print (a)
 
     steps = 0
     b = a
     result = []
-    while len(b) != 0:
+    while 0 != len(b):
       min = b[0]
       index = 0
       for i in range(1, len(b)):
         steps += 1
-        if b[i] < min:
+        if min > b[i]:
           min = b[i]
           index = i
 
       result.append(b[index])
-      if main: print "min:", min, "result:", result
+      if main: print ("min:", min, "result:", result)
       del b[index]
 
-    if main: print "steps:", steps
-    if main: print result
+    if main: print ("steps:", steps)
+    if main: print (result)
 
     return result
 

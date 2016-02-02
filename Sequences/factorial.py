@@ -1,12 +1,12 @@
 import unittest
 
-main = __name__ == "__main__"
+main = "__main__" == __name__
 
 '''"Pretend" to do recursion via a stack and iteration'''
 class factorial:
     def fact(self, a):
         if a < 0: raise ValueError("Less than zero")
-        if a == 0 or a == 1: return 1
+        if 0 == a or 1 == a: return 1
 
         stack = []
         while a > 1:
@@ -32,6 +32,6 @@ class test_factorial (unittest.TestCase):
         self.assertEquals(factorial().fact(10), 10*9*8*7*6*5*4*3*2*1)
 
 if main:
-        print factorial().fact(1)
-        print factorial().fact(2)
-        print factorial().fact(100)
+        print (factorial().fact(1))
+        print (factorial().fact(2))
+        print (factorial().fact(100))

@@ -1,7 +1,7 @@
 import unittest
 import random
 
-main = __name__ == "__main__"
+main =  "__main__" == __name__
 
 class merge_sort:
   '''This class implements the classic merge sort.'''
@@ -33,17 +33,17 @@ class merge_sort:
       two. Continue combining into 4, 8, etc. until the entire list is
       sorted.'''
     if not a: return a
-    if len(a) == 1: return a
+    if 1 == len(a): return a
 
     # listify a
     result = [a[i:i+1] for i in range(len(a))]
-    if main: print result
+    if main: print (result)
 
     while len(result) != 1:
       for i in range(len(result)/2):
         result[i] = self.merge(result[i], result[i+1])
         del result[i+1]
-        if main: print result
+        if main: print (result)
 
     return result[0]
 
@@ -81,5 +81,5 @@ class test_sort (unittest.TestCase):
     self.assertEquals(merge_sort().sort([4, 3, 2, 1]), [1, 2, 3, 4])
 
 if main:
-  print merge_sort().sort([4, 3, 2, 1])
-  print merge_sort().sort([5, 4, 3, 2, 1])
+  print (merge_sort().sort([4, 3, 2, 1]))
+  print (merge_sort().sort([5, 4, 3, 2, 1]))
