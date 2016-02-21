@@ -29,6 +29,8 @@ class test_binary_search(unittest.TestCase):
     self.assertTrue(binary_search(5, [1, 3, 5, 7, 9]))
   def test_missing(self):
     self.assertFalse(binary_search(4, [1, 3, 5, 7, 9]))
+  def test_string(self):
+    self.assertTrue(binary_search('a', 'abcdefg'))
 
 if "__main__" == __name__:
   trace = True

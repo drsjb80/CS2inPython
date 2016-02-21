@@ -1,9 +1,11 @@
+from __future__ import print_function
 import unittest
 import random
 
-trace =  True
+trace =  False
 
 def quick_sort(list):
+  if trace: print(list)
   if not list: return list
   if 1 == len(list): return list
 
@@ -40,7 +42,7 @@ class test_quick_sort (unittest.TestCase):
     self.assertEquals(quick_sort([4, 3, 2, 1]), [1, 2, 3, 4])
 
 if "__main__" == __name__:
-  a = range(100)
+  trace = True
+  a = list(range(20))
   random.shuffle(a)
-  print (a)
-  print (quick_sort(a))
+  print((quick_sort(a)))

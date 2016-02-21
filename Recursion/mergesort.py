@@ -1,15 +1,14 @@
+from __future__ import print_function, division
 import unittest
-import random
 
-main =  "__main__" == __name__
-trace = True
+trace = False
 
 class merge_sort:
   '''This class implements the classic merge sort.'''
 
   def merge(self, one, two):
     '''Merge two already sorted lists and return a single list.'''
-    if trace: print "merging:", one, "and:", two
+    if trace: print("merging:", one, "and:", two)
     if not one: return two
     if not two: return one
 
@@ -27,16 +26,16 @@ class merge_sort:
     if not a: result.extend(b)
     if not b: result.extend(a)
 
-    if trace: print "returning:", result
+    if trace: print("returning:", result)
 
     return result
 
   def sort(self, a):
-    if trace: print "sorting:", a
+    if trace: print("sorting:", a)
     if not a: return a
     if 1 == len(a): return a
 
-    half = len(a)/2
+    half = len(a)//2
     return self.merge(self.sort(a[:half]), self.sort(a[half:]))
 
 class test_merge (unittest.TestCase):
@@ -72,6 +71,7 @@ class test_sort (unittest.TestCase):
   def test_four(self):
     self.assertEquals(merge_sort().sort([4, 3, 2, 1]), [1, 2, 3, 4])
 
-if main:
-  print (merge_sort().sort([[4], [3], [2], [1]]))
-  print (merge_sort().sort([[5], [4], [3], [2], [1]]))
+if '__main__' == __name__:
+  trace = True
+  print((merge_sort().sort([[4], [3], [2], [1]])))
+  print((merge_sort().sort([[5], [4], [3], [2], [1]])))
