@@ -4,6 +4,9 @@ import sys
 
 trace = False
 
+''' Extend str and overwrite one method so that
+requests for characters beyond the last one
+return a space'''
 class mystr(str):
     def __getitem__(self, num):
         if num > len(self)-1: return " "
@@ -24,18 +27,14 @@ class test_mystr(unittest.TestCase):
 
 def radix_sort(list, longest):
     for position in range(longest-1, -1, -1):
-        if trace: print("position:", position, "list:", list)
         buckets = [[] for _ in range(128)]
 
         for word in list:
-            if trace: print("sort on:", word[position])
             where = ord(word[position])
-            if trace: print("putting:", word, "in:", where)
             buckets[where].append(word)
 
         list = []
         for bucket in buckets:
-            if trace: print("bucket:", bucket)
             list.extend(bucket)
 
     return list
