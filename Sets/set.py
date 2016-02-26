@@ -88,8 +88,7 @@ class my_set:
 
   def __ior(self, other):
     for i in other:
-      if i not in self:
-        self.add(i)
+      self.add(i)
     return(self)
 
   def __or__(self, other):
@@ -97,7 +96,8 @@ class my_set:
 
   def union(self, other):
     ret = my_set(self)
-    for i in other: ret.add(i)
+    for i in other:
+      ret.add(i)
     return(ret)
 
   def __iand__(self, other):
@@ -128,7 +128,7 @@ class my_set:
   def difference(self, other):
     ret = my_set(self)
     for i in other:
-      if i: ret.remove(i)
+      ret.remove(i)
     return(ret)
 
   def __eq__(self, other):

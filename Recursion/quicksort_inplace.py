@@ -2,7 +2,7 @@ from __future__ import print_function
 import unittest
 import random
 
-trace = False
+trace = True
 
 def partition(A, lo, hi):
   '''Due to C.A.R. Hoare'''
@@ -26,8 +26,8 @@ def partition(A, lo, hi):
       return j
 
     if trace: print("swapping", A[i], "and", A[j])
-      A[i], A[j] = A[j], A[i]
-      if trace: print(A)
+    A[i], A[j] = A[j], A[i]
+    if trace: print(A)
 
 def quick_sort_recurse(A, lo, hi):
   if lo < hi:
@@ -42,16 +42,24 @@ class test_quick_sort (unittest.TestCase):
   def test_both_none(self):
     self.assertEquals(quick_sort(None), None)
   def test_already_done(self):
-    self.assertEquals(quick_sort([1, 2, 3]), [1, 2, 3])
+    a = [1, 2, 3]
+    quick_sort(a)
+    self.assertEquals(a, [1, 2, 3])
   def test_no_movement(self):
     # pivot at end
-    self.assertEquals(quick_sort([1, 7, 3, 9]), [1, 3, 7, 9])
+    a = [1, 7, 3, 9]
+    quick_sort(a)
+    self.assertEquals(a, [1, 3, 7, 9])
   def test_move_one(self):
     # pivot in middle
-    self.assertEquals(quick_sort([1, 9, 3, 7]), [1, 3, 7, 9])
+    a = [1, 9, 3, 7]
+    quick_sort(a)
+    self.assertEquals(a, [1, 3, 7, 9])
   def test_reverse(self):
     # pivot at beginning
-    self.assertEquals(quick_sort([4, 3, 2, 1]), [1, 2, 3, 4])
+    a = [4, 3, 2, 1]
+    quick_sort(a)
+    self.assertEquals(a, [1, 2, 3, 4])
 
 if "__main__" == __name__:
   a = range(20)
