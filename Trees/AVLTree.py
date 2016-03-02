@@ -44,11 +44,11 @@ class binary_tree:
     
   def __replace_me(self, new):
       if self.__parent.__left == self:
-        print(self.__parent.__value, "replace_me", new, "on the left")
         self.__parent.__left = new
-      else:
-        print(self.__parent.__value, "replace_me", new, "on the right")
+      elif self.__parent.__right == self:
         self.__parent.__right = new
+      else:
+        assert(True)
   
   def __find_leftmost(self):
     t = self
@@ -75,18 +75,20 @@ class binary_tree:
       else:
         # find the right-most of the left hand tree
         rightmost = self.__left.__find_rightmost()
-        print("self:", self.__value)
-        print("rightmost:", rightmost)
 
-        # remove it, and set its parent to my parent
+        # remove it
         rightmost.__replace_me(None)
-        print("self:", self.__value)
-        self.__replace_me(rightmost)
-        print("self:", self.__value)
 
-        # and its right and left to my right and left
+        # set its right and left to my right and left
         rightmost.__left = self.__left
         rightmost.__right = self.__right
+
+        # ticky bit: if it's the root, don't change
+        # the refenence but only the value
+        if not self.__parent:
+          self.__value = rightmost.__value
+        else:
+          self.__replace_me(rightmost)
 
     elif self.__value > value:
       self.__left.remove(value)
@@ -102,12 +104,7 @@ class test_binary_tree (unittest.TestCase):
     25  35
   '''
 
-  def test_remove_both(self):
-    bt = binary_tree([20, 10, 15, 30, 25, 35])
-    bt.remove(30)
-    self.assertEquals(str(bt), '10,15,20,25,35')
 
-  '''
   def test_remove_root(self):
     bt = binary_tree([20, 10, 30, 25, 35])
     bt.remove(20)
@@ -143,7 +140,11 @@ class test_binary_tree (unittest.TestCase):
   def test_remove_only_right(self):
     bt = binary_tree([20, 10, 15, 30, 25, 35])
     bt.remove(10)
-  '''
+
+  def test_remove_both(self):
+    bt = binary_tree([20, 10, 15, 30, 25, 35])
+    bt.remove(30)
+    self.assertEquals(str(bt), '10,15,20,25,35')
 
   def test_init(self):
     bt = binary_tree([20, 10, 30, 25, 35])
