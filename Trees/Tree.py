@@ -42,14 +42,6 @@ class binary_tree:
       else:
         self.__right.add(value)
     
-  def __replace_me(self, new):
-      if self.__parent.__left == self:
-        self.__parent.__left = new
-      elif self.__parent.__right == self:
-        self.__parent.__right = new
-      else:
-        assert(True)
-  
   def __find_leftmost(self):
     t = self
     while t.__left:
@@ -62,32 +54,42 @@ class binary_tree:
       t = t.__right
     return(t)
 
+  def __parent_replace_me_with(self, new):
+    if self.__parent.__left == self:
+      self.__parent.__left = new
+    elif self.__parent.__right == self:
+      self.__parent.__right = new
+    else:
+      assert(True)
+
+  def __remove_both(self):
+    # find the right-most of the left hand tree
+    rightmost = self.__left.__find_rightmost()
+
+    # remove it
+    rightmost.__parent_replace_me_with(None)
+
+    # set its right and left to my right and left
+    rightmost.__left = self.__left
+    rightmost.__right = self.__right
+
+    # tricky bit: if it's the root, don't change
+    # the refenence but only the value
+    if not self.__parent:
+      self.__value = rightmost.__value
+    else:
+      self.__parent_replace_me_with(rightmost)
+
   def remove(self, value):
     if self.__value == value:
       if not self.__left and not self.__right:
-        self.__replace_me(None)
+        self.__parent_replace_me_with(None)
       elif not self.__left:
-        self.__replace_me(self.__right)
+        self.__parent_replace_me_with(self.__right)
       elif not self.__right:
-        self.__replace_me(self.__left)
+        self.__parent_replace_me_with(self.__left)
       else:
-        # find the right-most of the left hand tree
-        rightmost = self.__left.__find_rightmost()
-
-        # remove it
-        rightmost.__replace_me(None)
-
-        # set its right and left to my right and left
-        rightmost.__left = self.__left
-        rightmost.__right = self.__right
-
-        # ticky bit: if it's the root, don't change
-        # the refenence but only the value
-        if not self.__parent:
-          self.__value = rightmost.__value
-        else:
-          self.__replace_me(rightmost)
-
+        self.__remove_both()
     elif self.__value > value:
       self.__left.remove(value)
     else:
@@ -101,12 +103,6 @@ class test_binary_tree (unittest.TestCase):
      /  \
     25  35
   '''
-
-
-  def test_remove_root(self):
-    bt = binary_tree([20, 10, 30, 25, 35])
-    bt.remove(20)
-    self.assertEquals(str(bt), '10,25,30,35')
 
   def test_empty(self):
     self.assertEquals(str(binary_tree()), 'None')
@@ -143,6 +139,11 @@ class test_binary_tree (unittest.TestCase):
     bt = binary_tree([20, 10, 15, 30, 25, 35])
     bt.remove(30)
     self.assertEquals(str(bt), '10,15,20,25,35')
+
+  def test_remove_root(self):
+    bt = binary_tree([20, 10, 30, 25, 35])
+    bt.remove(20)
+    self.assertEquals(str(bt), '10,25,30,35')
 
   def test_init(self):
     bt = binary_tree([20, 10, 30, 25, 35])
