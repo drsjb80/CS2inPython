@@ -90,7 +90,6 @@ class graph:
 class test_graph(unittest.TestCase):
   def test_empty(self):
     self.assertEqual(len(graph().nodes()), 0)
-    self.assertEqual(len(graph().edges()), 0)
   def test_one(self):
     g = graph()
     g.add_node(1)
@@ -104,10 +103,10 @@ class test_graph(unittest.TestCase):
     g = graph()
     g.add_node(1)
     g.add_node(2)
-    g.add_edge((1, 2, 3))
+    g.add_edge((1, 2))
     self.assertEqual(len(g.nodes()), 2)
     self.assertEqual(len(g.edges()), 1)
-    self.assertEqual(str(g), 'nodes:(1, 2), edges:((1, 2, 3),)')
+    self.assertEqual(str(g), 'nodes:(1, 2), edges:((1, 2),)')
     g.add_edge((2, 1))
     self.assertEqual(len(g.edges()), 2)
     self.assertEqual(str(g), 'nodes:(1, 2), edges:((1, 2, 3), (2, 1))')
