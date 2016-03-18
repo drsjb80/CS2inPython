@@ -64,9 +64,7 @@ class graph:
 
     while queue:
       current = queue.pop(0)
-
       if current in visited: continue
-
       visited.append(current)
 
       if current == target: return visited

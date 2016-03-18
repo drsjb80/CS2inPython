@@ -2,20 +2,20 @@ from __future__ import print_function
 import unittest
 import sys
 
-"""Values are what the user wants to see, nodes are our internals"""
+""" Values are what the user sees, nodes are our internals """
 class weighted_digraph:
 
-  """An internal representation of an edge"""
+  """ An internal representation of an edge """
   class __edge(object):
     def __init__(self, to_node, weight):
       self.to_node = to_node
       self.weight = weight
 
-  """An internal representation of a node"""
+  """ An internal representation of a node """
   class __node(object):
     def __init__(self, value):
       self.value = value
-      self.edges = []
+      self.edges = set()
 
     def __str__(self):
       result = str(self.value)
@@ -25,11 +25,7 @@ class weighted_digraph:
       return(result)
 
     def add_edge(self, new_edge):
-      for edge in self.edges:
-        if edge.to_node == new_edge.to_node:
-          return
-
-      self.edges.append(new_edge)
+      self.edges.add(new_edge)
 
     def is_adjacent(self, node):
       for edge in self.edges:
@@ -37,8 +33,10 @@ class weighted_digraph:
           return(True)
       return(False)
 
-  """The directed, weighted, graph class itself"""
+  """ The directed, weighted, graph class itself """
   def __init__(self, nodes=None, edges=None):
+    """ Could be a set if we define both __eq__ and
+        __hash__ """
     self.__nodes = []
 
     if nodes:
@@ -48,6 +46,8 @@ class weighted_digraph:
     if edges:
       for edge in edges:
         self.add_edge(edge[0], edge[1], edge[2])
+
+  def __len__(self): return(len(self.__nodes))
 
   def __str__(self):
     result = ""
@@ -62,12 +62,13 @@ class weighted_digraph:
 
     return(None)
 
-  def __len__(self): return(len(self.__nodes))
-
   def add_node(self, value):
     if not self.__find(value):
       self.__nodes.append(self.__node(value))
 
+  """ Add an edge between two values. If the nodes
+      for those values aren't already in the graph,
+      add them. """
   def add_edge(self, from_value, to_value, weight):
     fn = self.__find(from_value)
     tn = self.__find(to_value)
@@ -75,11 +76,9 @@ class weighted_digraph:
     if not fn:
       self.add_node(from_value)
       fn = self.__find(from_value)
-      assert(fn)
     if not tn:
       self.add_node(to_value)
       tn = self.__find(to_value)
-      assert(tn)
 
     fn.add_edge(self.__edge(tn, weight))
   
