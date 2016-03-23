@@ -2,7 +2,9 @@ from __future__ import print_function
 from sys import stdin
 import unittest
 
-""" Values are what the user sees, nodes are our internals """
+""" A more sophisticated graph class. Nodes can be any value, not just
+    integers. Each node has a list of edges instead of the overall graph
+    having single set of edges. """
 class graph:
 
     class __node:
@@ -58,6 +60,7 @@ class graph:
             to_node = self.__node()
             self.__nodes.append(to_node)
 
+        # Add edges in both directions.
         if not self.adjacent(to_node):
             self.append(self.__edge(to_node, weight))
         if not to_node.adjacent(self):
@@ -67,7 +70,8 @@ class graph:
         return(self.__find(from_value).adjacent(self.__find(to_value)))
 
     ''' Add an edge from one node to another. If either nodes does not
-    exist, add it. If either edge already exists, don't add a new edge. '''
+        exist, add it. If either edge already exists, don't add a new
+        edge. '''
     def add_edge(self, from_value, to_value, weight):
         from_node = self.__find(from_value)
         to_node = self.__find(to_value)
@@ -142,39 +146,94 @@ class graph:
       
         return None
 
+    def kruskal(self):
+        forrest = []
+        edges = []
+        solution = []
+        for node in self.__nodes:
+            s = set()
+            s.add(node)
+            forrest.append(s)
+            for edge in node.edges:
+                edges.append((node, edge.to_node, edge.weight))
+
+        while edges:
+
+            # print(map(lambda y: map(lambda x: x.value, y), forrest))
+
+            min_weight = float("inf")
+            for edge in edges:
+                if edge[2] < min_weight:
+                    min_weight = edge[2]
+                    min_edge = edge
+
+            # print("min_edge:", min_edge[0].value, min_edge[1].value)
+            edges.remove(min_edge)
+            edges.remove((min_edge[1], min_edge[0], min_edge[2]))
+
+            s0 = s1 = None
+            for tree in forrest:
+                if min_edge[0] in tree: s0 = tree
+                if min_edge[1] in tree: s1 = tree
+                if s0 and s1: break
+
+            ''' If the two vertices are in two different trees. '''
+            if s0 != s1:
+                solution.append(min_edge)
+                forrest.remove(s0)
+                forrest.remove(s1)
+                forrest.append(s0.union(s1))
+
+            if len(solution) == len(self.__nodes) - 1: break
+            # or: if len(forrest) == 1: break
+
+        result = map(lambda x: str(x[0].value) + '->' + \
+                    str(x[1].value), solution)
+        return(result)
+
     def dijkstra(self, s):
 
-        q = []
         for node in self.__nodes:
-            node.__dist = float("inf")
-            node.__prev = None
-            q.append(node)
+            node.dist = float("inf")
+            node.prev = None
 
         source = self.__find(s)
-        source.__dist = 0
+        source.dist = 0
 
-        while q:
-            min = float("inf")
-            for node in q:
-                if node.__dist < min:
+        todo = set()
+        todo.add(source)
+
+        while todo:
+            min_value = float("inf")
+            for node in todo:
+                if node.dist < min:
                     min_node = node
-                    min = node.__dist
+                    min_value = node.dist
 
-            q.remove(min_node)
+            todo.remove(min_node)
     
             for edge in min_node.edges:
-                new_dist = min + edge.weight
-                if new_dist < edge.to_node.__dist:
-                    edge.to_node.__dist = new_dist
-                    edge.to_node.__prev = min_node
+                new_dist = min_value + edge.weight
+                if new_dist < edge.to_node.dist:
+                    edge.to_node.dist = new_dist
+                    edge.to_node.prev = min_node
+                    todo.add(edge.to_node)
 
+        result = []
         for node in self.__nodes:
-            print(node.value, node.__dist)
-            while node != source:
-                print('\t', node.__prev.value)
-                node = node.__prev
+            one = []
+            one.append(node.dist)
+            one.append(node.value)
+            prev = node
+            while prev != source:
+                one.append(prev.prev.value)
+                prev = prev.prev
+            result.append(one)
+
+        return(result)
 
 class test_graph(unittest.TestCase):
+    """
     def test_empty(self):
         self.assertEqual(len(graph()), 0)
 
@@ -227,6 +286,7 @@ class test_graph(unittest.TestCase):
         self.assertEqual(str(g), \
            'Denver->Boston(1971.8)\nBoston->Denver(1971.8)\n')
 
+    """
     def test_dijkstra(self):
         '''
             2---1---4
@@ -242,7 +302,27 @@ class test_graph(unittest.TestCase):
         g = graph([1, 2, 3, 4, 5, 6], \
             [(1,2,2), (1,3,1), (2,3,1), (2,4,1), (2,5,2), (3,5,5), \
              (4,5,3), (4,6,6), (5,6,1)])
-        # g.dijkstra(1)
+        self.assertEquals(g.dijkstra(1), [[0, 1], [2, 2, 1], [1, 3, 1], \
+            [3, 4, 2, 1], [4, 5, 2, 1], [5, 6, 5, 2, 1]])
+    def test_kruskal(self):
+        '''
+        1--(7)--2--(8)--3
+        |     /   \     |
+       (5) (9)     (7) (5)
+        | /           \ |
+        4------(15)-----5
+          \           / |
+           (6)     (8) (9)
+              \   /     |
+                6 -(11)-7
+        '''
+        # FIXME
+        g = graph([1,2,3,4,5,6,7], \
+            [(1,2,7), (1,4,5), (2,3,8), (2,4,9), (2,5,7), (3,5,5), \
+            (4,5,15), (4,6,6), (5,6,8), (5,7,9), (6,7,11)])
+        self.assertEquals(g.kruskal(), \
+            ['1->4', '3->5', '4->6', '1->2', '2->5', '5->7'])
+    """
     def test_DFS(self):
         g = graph([1, 2, 3, 4, 5, 6], \
             [(1,2,1), (1,3,1), (2,3,1), (2,4,1), \
@@ -263,18 +343,20 @@ class test_graph(unittest.TestCase):
         self.assertEquals(g.BFS(1, 6), [1, 2, 3, 5, 4, 6])
         self.assertEquals(g.BFS(5, 1), [5, 4, 6, 2, 3, 1])
         self.assertEquals(g.BFS(1, 7), None)
-    '''
     def test_short_BFS(self):
         g = graph([1, 2, 3, 4, 5, 6], \
             [(1,2,1), (1,3,1), (2,3,1), (2,4,1), \
             (2,5,1), (3,5,1), (4,5,1), (4,6,1), (5,6,1)])
         self.assertEquals(g.BFS(1, 2), [1, 2])
-    '''
+    """
 
 if '__main__' == __name__:
     g = graph()
     for line in stdin:
         a = line.strip().split(" ")
         g.add_edge(a[0], a[1], int(a[2]))
-    print(g)
-    g.dijkstra("Denver")
+    result = g.dijkstra("Denver")
+    for city in result:
+        print(city[1], "is", city[0], 'miles from Denver, path:')
+        for path in city[2:]:
+            print("   ", path)
