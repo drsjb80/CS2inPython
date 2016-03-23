@@ -2,6 +2,8 @@ from __future__ import print_function
 import unittest
 import sys
 
+''' A very simple graph class. Nodes are all integers. Has sets
+    nodes and edges. '''
 class graph:
   def __init__(self, nodes=None, edges=None):
     self.__nodes = set()
@@ -30,7 +32,6 @@ class graph:
       if edge[1] == node: result += (edge[0],)
     return(result)
 
-  """Find a path through a graph"""
   def DFS(self, start, target):
     stack = [start]
     visited = []
@@ -137,3 +138,7 @@ edges:(('Denver', 'Boulder'),)")
     self.assertEquals(g.BFS(1, 6), [1, 2, 3, 5, 4, 6])
     self.assertEquals(g.BFS(5, 1), [5, 4, 6, 2, 3, 1])
     self.assertEquals(g.BFS(1, 7), None)
+  def test_short_BFS(self):
+    g = graph([1, 2, 3, 4, 5, 6], [(1,2), (1,3), (2,3), (2,4), (2,5), \
+      (3,5), (4,5), (4,6), (5,6)])
+    self.assertEquals(g.BFS(1, 2), [1, 2])
