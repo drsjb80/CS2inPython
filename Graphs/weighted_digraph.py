@@ -25,8 +25,8 @@ class weighted_digraph:
       return(result)
 
     def add_edge(self, new_edge):
-      if not is_adjacent(new_edge.to_node):
-          self.edges.add(new_edge)
+      if not self.is_adjacent(new_edge.to_node):
+          self.edges.append(new_edge)
 
     def is_adjacent(self, node):
       for edge in self.edges:
@@ -106,21 +106,24 @@ class weighted_digraph:
 
     return None
 
-  def rDFS(self, start_value, target_value, visited):
-    start_node = self.__find(start_value)
-    target_node = self.__find(target_value)
-    if not target_node or not start_node: return(None)
-
+  def __rDFS(self, start_node, target_node, visited):
     visited.append(start_node)
 
-    if start_node.value == target_value:
+    if start_node.value == target_node.value:
         return(map(lambda x: x.value, visited))
 
     for edge in start_node.edges:
       if edge.to_node not in visited:
-        return(self.rDFS(edge.to_node.value, target_value, visited))
+        return(self.__rDFS(edge.to_node, target_node, visited))
 
     return None
+
+  def rDFS(self, start_value, target_value):
+    start_node = self.__find(start_value)
+    target_node = self.__find(target_value)
+    if not target_node or not start_node: return(None)
+
+    return self.__rDFS(start_node, target_node, [])
 
   def BFS(self, start_value, target_value):
     start_node = self.__find(start_value)
@@ -213,7 +216,7 @@ class test_weighted_digraph(unittest.TestCase):
     g = weighted_digraph([1, 2, 3, 4, 5, 6], \
       [(1,2,1), (1,3,1), (2,3,1), (2,4,1), (2,5,1), (3,5,1), (4,5,1), \
       (4,6,1), (5,6,1)])
-    self.assertEquals(g.DFS(1, 6), [1, 2, 4, 6])
+    self.assertEquals(g.DFS(1, 6), [1, 3, 5, 6])
     self.assertEquals(g.DFS(3, 4), None)
     self.assertEquals(g.DFS(1, 7), None)
 
@@ -221,15 +224,15 @@ class test_weighted_digraph(unittest.TestCase):
     g = weighted_digraph([1, 2, 3, 4, 5, 6], \
       [(1,2,1), (1,3,1), (2,3,1), (2,4,1), (2,5,1), (3,5,1), (4,5,1), \
       (4,6,1), (5,6,1)])
-    self.assertEquals(g.rDFS(1, 6, []), [1, 3, 5, 6])
-    self.assertEquals(g.rDFS(3, 4, []), None)
-    self.assertEquals(g.rDFS(1, 7, []), None)
+    self.assertEquals(g.rDFS(1, 6), [1, 2, 3, 5, 6])
+    self.assertEquals(g.rDFS(3, 4), None)
+    self.assertEquals(g.rDFS(1, 7), None)
 
   def test_BFS(self):
     g = weighted_digraph([1, 2, 3, 4, 5, 6], \
       [(1,2,1), (1,3,1), (2,3,1), (2,4,1), (2,5,1), (3,5,1), (4,5,1), \
       (4,6,1), (5,6,1)])
-    self.assertEquals(g.BFS(1, 6), [1, 3, 2, 5, 4, 6])
+    self.assertEquals(g.BFS(1, 6), [1, 2, 3, 4, 5, 6])
     self.assertEquals(g.BFS(5, 1), None)
     self.assertEquals(g.BFS(1, 7), None)
 
