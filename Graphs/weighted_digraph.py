@@ -28,6 +28,11 @@ class weighted_digraph:
       if not self.is_adjacent(new_edge.to_node):
           self.edges.append(new_edge)
 
+    def remove_edge(self, to_node):
+      for edge in self.edges:
+        if edge.to_node == to_node:
+          self.edges.remove(edge)
+
     def is_adjacent(self, node):
       for edge in self.edges:
         if edge.to_node == node:
@@ -35,17 +40,10 @@ class weighted_digraph:
       return(False)
 
   """ The directed, weighted, graph class itself """
-  def __init__(self, nodes=None, edges=None):
+  def __init__(self, directed=True):
     """ Could be a set if we define both __eq__ and __hash__ """
     self.__nodes = []
-
-    if nodes:
-      for node in nodes:
-        self.add_node(node)
-
-    if edges:
-      for edge in edges:
-        self.add_edge(edge[0], edge[1], edge[2])
+    self.__directed = directed
 
   def __len__(self): return(len(self.__nodes))
 
@@ -55,98 +53,55 @@ class weighted_digraph:
       result += str(node) + '\n'
     return(result)
 
-  def __find(self, value):
+  def get_nodes(self): return self.__nodes[:]
+
+  def find(self, value):
     for node in self.__nodes:
       if node.value == value:
         return(node)
 
     return(None)
 
+  def add_nodes(self, nodes):
+    for node in nodes:
+      self.add_node(node)
+
   def add_node(self, value):
-    if not self.__find(value):
+    if not self.find(value):
       self.__nodes.append(self.__node(value))
+
+  def add_edges(self, edges):
+    for edge in edges:
+      self.add_edge(edge[0], edge[1], edge[2])
 
   """ Add an edge between two values. If the nodes
       for those values aren't already in the graph,
-      add them. """
+      add those. """
   def add_edge(self, from_value, to_value, weight):
-    fn = self.__find(from_value)
-    tn = self.__find(to_value)
+    from_node = self.find(from_value)
+    to_node = self.find(to_value)
 
-    if not fn:
+    if not from_node:
       self.add_node(from_value)
-      fn = self.__find(from_value)
-    if not tn:
+      from_node = self.find(from_value)
+    if not to_node:
       self.add_node(to_value)
-      tn = self.__find(to_value)
+      to_node = self.find(to_value)
 
-    fn.add_edge(self.__edge(tn, weight))
+    from_node.add_edge(self.__edge(to_node, weight))
+    if not self.__directed:
+      to_node.add_edge(self.__edge(from_node, weight))
+
+  def remove_edge(self, from_value, to_value, weight):
+    from_node = self.find(from_value)
+    to_node = self.find(to_value)
+
+    from_node.remove_edge(to_node)
+    if not self.directed:
+      to_node.remove_edge(from_node)
   
   def are_adjacent(self, value1, value2):
-    return(self.__find(value1).is_adjacent(self.__find(value2)))
-
-  def DFS(self, start_value, target_value):
-    target_node = self.__find(target_value)
-    start_node = self.__find(start_value)
-    if not target_node or not start_node: return(None)
-
-    stack = [start_node]
-    visited = []
-
-    while stack:
-      current = stack.pop()
-      visited.append(current)
-
-      if current.value == target_value:
-        return(map(lambda x: x.value, visited))
-
-      for edge in current.edges:
-        if edge.to_node not in visited:
-          stack.append(edge.to_node)
-
-    return None
-
-  def __rDFS(self, start_node, target_node, visited):
-    visited.append(start_node)
-
-    if start_node.value == target_node.value:
-        return(map(lambda x: x.value, visited))
-
-    for edge in start_node.edges:
-      if edge.to_node not in visited:
-        return(self.__rDFS(edge.to_node, target_node, visited))
-
-    return None
-
-  def rDFS(self, start_value, target_value):
-    start_node = self.__find(start_value)
-    target_node = self.__find(target_value)
-    if not target_node or not start_node: return(None)
-
-    return self.__rDFS(start_node, target_node, [])
-
-  def BFS(self, start_value, target_value):
-    start_node = self.__find(start_value)
-    target_node = self.__find(target_value)
-    if not target_node or not start_node: return(None)
-
-    queue = [start_node]
-    visited = []
-
-    while queue:
-      current = queue.pop(0)
-
-      if current in visited: continue
-      visited.append(current)
-
-      if current.value == target_value:
-        return(map(lambda x: x.value, visited))
-
-      for edge in current.edges:
-        if edge.to_node not in visited:
-          queue.append(edge.to_node)
-      
-    return None
+    return(self.find(value1).is_adjacent(self.find(value2)))
 
 class test_weighted_digraph(unittest.TestCase):
   def test_empty(self):
@@ -176,68 +131,45 @@ class test_weighted_digraph(unittest.TestCase):
     g.add_edge(1, 2, 3)
     self.assertEqual(str(g), '1->2(3)\n2\n')
 
-  def test_init(self):
-    g = weighted_digraph([1, 2], [(1, 2, 3), (2, 1, 3)])
+  def test_adding_ints(self):
+    g = weighted_digraph()
+    g.add_nodes([1, 2])
+    g.add_edges([(1, 2, 3), (2, 1, 3)])
     self.assertEqual(str(g), '1->2(3)\n2->1(3)\n')
 
-  def test_init(self):
-    g = weighted_digraph(['Denver', 'Boston'], \
-      [('Denver', 'Boston', 1971.8), ('Boston', 'Denver', 1971.8)])
-    self.assertEqual(str(g),
-    'Denver->Boston(1971.8)\nBoston->Denver(1971.8)\n')
+  def test_adding_strings(self):
+    g = weighted_digraph()
+    g.add_nodes(['Denver', 'Boston'])
+    g.add_edges([('Denver', 'Boston', 1971.8), ('Boston', 'Denver', 1971.8)])
+    self.assertEqual(str(g), 'Denver->Boston(1971.8)\nBoston->Denver(1971.8)\n')
 
   def test_are_adjacent(self):
-    g = weighted_digraph(['Denver', 'Boston'], \
-      [('Denver', 'Boston', 1971.8), ('Boston', 'Denver', 1971.8)])
+    g = weighted_digraph()
+    g.add_nodes(['Denver', 'Boston'])
+    g.add_edges([('Denver', 'Boston', 1971.8), ('Boston', 'Denver', 1971.8)])
     self.assertTrue(g.are_adjacent('Denver', 'Boston'))
 
   def test_arent_adjacent(self):
-    g = weighted_digraph(['Denver', 'Boston', 'Milano'], \
-      [('Denver', 'Boston', 1971.8), ('Boston', 'Denver', 1971.8)])
+    g = weighted_digraph()
+    g.add_nodes(['Denver', 'Boston', 'Milano'])
+    g.add_edges([('Denver', 'Boston', 1971.8), ('Boston', 'Denver', 1971.8)])
     self.assertFalse(g.are_adjacent('Denver', 'Milano'))
 
+  def test_arent_adjacent_directed(self):
+    g = weighted_digraph()
+    g.add_edges([('Denver', 'Boston', 1971.8)])
+    self.assertFalse(g.are_adjacent('Denver', 'Milano'))
+    self.assertFalse(g.are_adjacent('Boston', 'Denver'))
+    self.assertTrue(g.are_adjacent('Denver', 'Boston'))
+
+  def test_arent_adjacent_undirected(self):
+    g = weighted_digraph(False)
+    g.add_edges([('Denver', 'Boston', 1971.8)])
+    self.assertTrue(g.are_adjacent('Boston', 'Denver'))
+    self.assertTrue(g.are_adjacent('Denver', 'Boston'))
+
   def test_add_edges_without_nodes(self):
-    g = weighted_digraph([], \
-      [('Denver', 'Boston', 1971.8), ('Boston', 'Denver', 1971.8)])
+    g = weighted_digraph()
+    g.add_edges([('Denver', 'Boston', 1971.8), ('Boston', 'Denver', 1971.8)])
     self.assertEqual(str(g), \
-    'Denver->Boston(1971.8)\nBoston->Denver(1971.8)\n')
-
-  '''
-     2---->4
-    ^|\    |\
-   / | \   | V
-  1  |  \  |  6
-   \ |   \ | ^
-    VV    VV/
-     3---->5
-  '''
-
-  def test_DFS(self):
-    g = weighted_digraph([1, 2, 3, 4, 5, 6], \
-      [(1,2,1), (1,3,1), (2,3,1), (2,4,1), (2,5,1), (3,5,1), (4,5,1), \
-      (4,6,1), (5,6,1)])
-    self.assertEquals(g.DFS(1, 6), [1, 3, 5, 6])
-    self.assertEquals(g.DFS(3, 4), None)
-    self.assertEquals(g.DFS(1, 7), None)
-
-  def test_rDFS(self):
-    g = weighted_digraph([1, 2, 3, 4, 5, 6], \
-      [(1,2,1), (1,3,1), (2,3,1), (2,4,1), (2,5,1), (3,5,1), (4,5,1), \
-      (4,6,1), (5,6,1)])
-    self.assertEquals(g.rDFS(1, 6), [1, 2, 3, 5, 6])
-    self.assertEquals(g.rDFS(3, 4), None)
-    self.assertEquals(g.rDFS(1, 7), None)
-
-  def test_BFS(self):
-    g = weighted_digraph([1, 2, 3, 4, 5, 6], \
-      [(1,2,1), (1,3,1), (2,3,1), (2,4,1), (2,5,1), (3,5,1), (4,5,1), \
-      (4,6,1), (5,6,1)])
-    self.assertEquals(g.BFS(1, 6), [1, 2, 3, 4, 5, 6])
-    self.assertEquals(g.BFS(5, 1), None)
-    self.assertEquals(g.BFS(1, 7), None)
-
-  def test_short_BFS(self):
-    g = weighted_digraph([1, 2, 3, 4, 5, 6],
-      [(1,2,1), (1,3,1), (2,3,1), (2,4,1), (2,5,1), (3,5,1), (4,5,1), \
-      (4,6,1), (5,6,1)])
-    self.assertEquals(g.BFS(1, 2), [1, 2])
+      'Denver->Boston(1971.8)\nBoston->Denver(1971.8)\n')
