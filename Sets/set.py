@@ -2,7 +2,7 @@ from __future__ import print_function
 import unittest
 import sys
 
-trace = False
+TRACE = False
 
 '''A set class implemented by chaining. The set is
 represented internally by a list of lists. When
@@ -10,231 +10,216 @@ multiple values hash to the same location (a
 collision), new values are appended to the list at
 that location. The list is rehashed when ~75% full.
 The size starts at 10 and doubles with each rehash'''
-class my_set:
-  def __init__(self, init=None):
-    self.__limit = 10
-    self.__none = object();
-    self.__items = [self.__none] * self.__limit
-    self.__count = 0
+class Set(object):
+    def __init__(self, init=None):
+        self.__limit = 10
+        self.__items = [[] for _ in range(self.__limit)]
+        self.__count = 0
 
-    if init:
-      for i in init:
-        self.add(i)
+        if init:
+            for i in init:
+                self.add(i)
 
-  def __len__(self): return(self.__count)
+    def __len__(self): return self.__count
 
-  def __flattened(self):
-    flattened = filter(lambda x: x != self.__none, self.__items)
-    flattened = [item for inner in flattened for item in inner]
-    return(flattened)
+    def __flattened(self):
+        return [item for inner in self.__items for item in inner]
 
-  def __iter__(self): return(iter(self.__flattened()))
-  def __str__(self): return(str(self.__flattened()))
+    def __iter__(self): return iter(self.__flattened())
+    def __str__(self): return str(self.__flattened())
 
-  # DRY refactoring
-  def __hash(self, item): return(hash(item) % self.__limit)
+    # DRY refactoring
+    def _hash(self, item): return hash(item) % self.__limit
 
-  # DRY refactoring
-  def __add(self, item):
-    assert item != self.__none
+    # DRY refactoring
+    def _add(self, item):
+        self.__items[self._hash(item)].append(item)
 
-    if trace: print("__add before:", self.__items)
-    h = self.__hash(item)
+    def add(self, item):
+        if item in self: return
 
-    if self.__items[h] == self.__none:
-      self.__items[h] = [item]
-    else:
-      self.__items[h].append(item)
-    if trace: print("__add after:", self.__items)
+        self._add(item)
+        self.__count += 1
 
-  def add(self, item):
-    if item in self: return
+        if (0.0 + self.__count) / self.__limit > .75: self.__rehash()
 
-    self.__add(item)
-    self.__count += 1
+    def __rehash(self):
+        old_items = self.__flattened()
 
-    if (0.0 + self.__count) / self.__limit > .75: self.__rehash()
+        self.__limit *= 2
+        self.__items = [[] for _ in range(self.__limit)]
 
-  def __rehash(self):
-    if trace: print("rehashing before:", self.__items)
+        for i in old_items:
+            self._add(i)
 
-    old_items = self.__flattened()
+    def __contains__(self, item):
+        hash1 = self._hash(item)
+        for i in self.__items[hash1]:
+            if i == item: return True
+        return False
 
-    self.__limit *= 2
-    self.__items = [self.__none] * self.__limit
+    def remove(self, item):
+        if item not in self: raise KeyError(item)
 
-    for i in old_items: self.__add(i)
+        hash1 = self._hash(item)
+        self.__items[hash1].remove(item)
 
-    if trace: print("rehashing after:", self.__items)
+        self.__count -= 1
 
-  def __contains__(self, item):
-    h = self.__hash(item)
-    if self.__items[h] != self.__none:
-      for i in self.__items[h]:
-        if i == item: return True
-    return False
+    def __ior__(self, other):
+        for i in other:
+            self.add(i)
+        return self
 
-  def remove(self, item):
-    if item not in self: raise(KeyError(item))
+    def __or__(self, other):
+        return self.union(other)
 
-    h = self.__hash(item)
-    self.__items[h].remove(item)
+    def union(self, other):
+        ret = Set(self)
+        for i in other:
+            ret.add(i)
+        return ret
 
-    # not strictly necessary, but for consistency
-    if self.__items[h] == []:
-      self.__items[h] = self.__none
+    def __iand__(self, other):
+        for i in self:
+            if i not in other:
+                self.remove(i)
+        return self
 
-    self.__count -= 1
+    def __and__(self, other):
+        return self.intersection(other)
 
-  def __ior(self, other):
-    for i in other:
-      self.add(i)
-    return(self)
+    def intersection(self, other):
+        ret = Set()
+        for i in self:
+            for j in other:
+                if i == j: ret.add(i)
+        return ret
 
-  def __or__(self, other):
-    return(self.union(other))
+    def __isub__(self, other):
+        for i in self:
+            if i in other:
+                self.remove(i)
+        return self
 
-  def union(self, other):
-    ret = my_set(self)
-    for i in other:
-      ret.add(i)
-    return(ret)
+    def __sub__(self, other):
+        return self.difference(other)
 
-  def __iand__(self, other):
-    for i in self:
-      if i not in other:
-        self.remove(i)
-    return(self)
+    def difference(self, other):
+        ret = Set(self)
+        for i in other:
+            ret.remove(i)
+        return ret
 
-  def __and__(self, other):
-    return(self.intersection(other))
+    def __eq__(self, other):
+        if len(self) != len(other): return False
 
-  def intersection(self, other):
-    ret = my_set()
-    for i in self:
-      for j in other:
-        if i == j: ret.add(i)
-    return(ret)
+        for i in self:
+            if i not in other:
+                return False
+        return True
 
-  def __isub__(self, other):
-    for i in self:
-      if i in other:
-        self.remove(i)
-    return(self)
-
-  def __sub__(self, other):
-    return(self.difference(other))
-
-  def difference(self, other):
-    ret = my_set(self)
-    for i in other:
-      ret.remove(i)
-    return(ret)
-
-  def __eq__(self, other):
-    for i in self:
-      if i not in other:
-        return(False)
-    return(True)
-
-class test_my_set(unittest.TestCase):
-  def test_empty(self):
-    self.assertEqual(len(my_set()), 0)
-  def test_add_one(self):
-    s = my_set()
-    s.add("one")
-    self.assertEquals(len(s), 1)
-  def test_add_twice(self):
-    s = my_set()
-    s.add("one")
-    s.add("one")
-    self.assertEquals(len(s), 1)
-  def test_remove(self):
-    s = my_set()
-    s.add("one")
-    self.assertRaises(KeyError, lambda: s.remove("two"))
-    s.remove("one")
-    self.assertEquals(len(s), 0)
-  def test_one_in(self):
-    s = my_set()
-    s.add("one")
-    self.assertTrue("one" in s)
-  def test_none(self):
-    s = my_set()
-    s.add(None)
-    self.assertTrue(None in s)
-  def test_collide(self):
-    s = my_set()
-    s.add(0)
-    s.add(10)
-    self.assertEquals(len(s), 2)
-    self.assertTrue(0 in s)
-    self.assertTrue(10 in s)
-    self.assertFalse(20 in s)
-  def test_rehash(self):
-    s = my_set()
-    s.add(0), s.add(10), s.add(1), s.add(2), s.add(3), s.add(4)
-    s.add(5), s.add(6), s.add(7), s.add(8), s.add(9), s.add(11)
-    self.assertEquals(len(s), 12)
-    self.assertEquals(str(s), '[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]')
-    t = my_set(s)
-    self.assertEquals(str(t), '[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]')
-  def test_eq(self):
-    s = my_set([1, 3, 5, 7, 9])
-    t = my_set([2, 4, 6, 8])
-    self.assertTrue(s == s)
-    self.assertFalse(s == t)
-  def test_union(self):
-    s = my_set([1, 3, 5, 7, 9])
-    t = my_set([2, 4, 6, 8])
-    u = s.union(t)
-    e = my_set([1, 2, 3, 4, 5, 6, 7, 8, 9])
-    self.assertEquals(u, e)
-  def test_or(self):
-    s = my_set([1, 3, 5, 7, 9])
-    t = my_set([2, 4, 6, 8])
-    u = s | t
-    self.assertEquals(u, my_set([1, 2, 3, 4, 5, 6, 7, 8, 9]))
-  def test_ior(self):
-    s = my_set([1, 3, 5, 7, 9])
-    t = my_set([2, 4, 6, 8])
-    s |= t
-    self.assertEquals(s, my_set([1, 2, 3, 4, 5, 6, 7, 8, 9]))
-  def test_intersection(self):
-    s = my_set([1, 3, 5, 7, 9])
-    t = my_set([3, 5, 7])
-    u = s.intersection(t)
-    self.assertEquals(u, my_set([3, 5, 7]))
-  def test_and(self):
-    s = my_set([1, 3, 5, 7, 9])
-    t = my_set([3, 5, 7])
-    u = s & t
-    self.assertEquals(u, my_set([3, 5, 7]))
-  def test_iand(self):
-    s = my_set([1, 3, 5, 7, 9])
-    t = my_set([3, 5, 7])
-    s &= t
-    self.assertEquals(s, my_set([3, 5, 7]))
-  def test_difference(self):
-    s = my_set([1, 3, 5, 7, 9])
-    t = my_set([3, 5, 7])
-    u = s.difference(t)
-    self.assertEquals(u, my_set([1, 9]))
-  def test_sub(self):
-    s = my_set([1, 3, 5, 7, 9])
-    t = my_set([3, 5, 7])
-    u = s - t
-    self.assertEquals(u, my_set([1, 9]))
-  def test_isub(self):
-    s = my_set([1, 3, 5, 7, 9])
-    t = my_set([3, 5, 7])
-    s -= t
-    self.assertEquals(s, my_set([1, 9]))
+class TestSet(unittest.TestCase):
+    def test_empty(self):
+        self.assertEqual(len(Set()), 0)
+    def test_add_one(self):
+        set1 = Set()
+        set1.add("one")
+        self.assertEquals(len(set1), 1)
+    def test_add_twice(self):
+        set1 = Set()
+        set1.add("one")
+        set1.add("one")
+        self.assertEquals(len(set1), 1)
+    def test_remove(self):
+        set1 = Set()
+        set1.add("one")
+        self.assertRaises(KeyError, lambda: set1.remove("two"))
+        set1.remove("one")
+        self.assertEquals(len(set1), 0)
+    def test_one_in(self):
+        set1 = Set()
+        set1.add("one")
+        self.assertTrue("one" in set1)
+    def test_none(self):
+        set1 = Set()
+        set1.add(None)
+        self.assertTrue(None in set1)
+    def test_collide(self):
+        set1 = Set()
+        set1.add(0)
+        set1.add(10)
+        self.assertEquals(len(set1), 2)
+        self.assertTrue(0 in set1)
+        self.assertTrue(10 in set1)
+        self.assertFalse(20 in set1)
+    def test_rehash(self):
+        set1 = Set()
+        set1.add(0); set1.add(10); set1.add(1); set1.add(2); set1.add(3)
+        set1.add(4); set1.add(5); set1.add(6); set1.add(7); set1.add(8)
+        set1.add(9); set1.add(11)
+        self.assertEquals(len(set1), 12)
+        self.assertEquals(str(set1), '[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]')
+        set2 = Set(set1)
+        self.assertEquals(str(set2), '[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]')
+    def test_eq(self):
+        set1 = Set([1, 3, 5, 7, 9])
+        set2 = Set([2, 4, 6, 8])
+        self.assertTrue(set1 == set1)
+        self.assertFalse(set1 == set2)
+        set3 = Set([1, 3, 5, 7, 9, 11])
+        self.assertFalse(set1 == set3)
+    def test_union(self):
+        set1 = Set([1, 3, 5, 7, 9])
+        set2 = Set([2, 4, 6, 8])
+        set3 = set1.union(set2)
+        set4 = Set([1, 2, 3, 4, 5, 6, 7, 8, 9])
+        self.assertEquals(set3, set4)
+    def test_or(self):
+        set1 = Set([1, 3, 5, 7, 9])
+        set2 = Set([2, 4, 6, 8])
+        set3 = set1 | set2
+        self.assertEquals(set3, Set([1, 2, 3, 4, 5, 6, 7, 8, 9]))
+    def test_ior(self):
+        set1 = Set([1, 3, 5, 7, 9])
+        set2 = Set([2, 4, 6, 8])
+        set1 |= set2
+        self.assertEquals(set1, Set([1, 2, 3, 4, 5, 6, 7, 8, 9]))
+    def test_intersection(self):
+        set1 = Set([1, 3, 5, 7, 9])
+        set2 = Set([3, 5, 7])
+        set3 = set1.intersection(set2)
+        self.assertEquals(set3, Set([3, 5, 7]))
+    def test_and(self):
+        set1 = Set([1, 3, 5, 7, 9])
+        set2 = Set([3, 5, 7])
+        set3 = set1 & set2
+        self.assertEquals(set3, Set([3, 5, 7]))
+    def test_iand(self):
+        set1 = Set([1, 3, 5, 7, 9])
+        set2 = Set([3, 5, 7])
+        set1 &= set2
+        self.assertEquals(set1, Set([3, 5, 7]))
+    def test_difference(self):
+        set1 = Set([1, 3, 5, 7, 9])
+        set2 = Set([3, 5, 7])
+        set3 = set1.difference(set2)
+        self.assertEquals(set3, Set([1, 9]))
+    def test_sub(self):
+        set1 = Set([1, 3, 5, 7, 9])
+        set2 = Set([3, 5, 7])
+        set3 = set1 - set2
+        self.assertEquals(set3, Set([1, 9]))
+    def test_isub(self):
+        set1 = Set([1, 3, 5, 7, 9])
+        set2 = Set([3, 5, 7])
+        set1 -= set2
+        self.assertEquals(set1, Set([1, 9]))
 
 if "__main__" == __name__:
-  s = my_set()
-  for line in sys.stdin:
-    l = line.strip()
-    s.add(l)
+    total = Set()   # pylint: disable=C0103
+    for line in sys.stdin:
+        l = line.strip()
+        total.add(l)
 
-  print(s)
+    print(total)
