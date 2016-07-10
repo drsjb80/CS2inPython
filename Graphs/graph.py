@@ -80,7 +80,7 @@ class Graph:
 
 class TestGraph(unittest.TestCase):
     def setUp(self):
-        '''
+        r'''
           2---4
          /|\  |\
         1 | \ | 6
