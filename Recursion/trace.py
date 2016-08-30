@@ -7,23 +7,23 @@ def print_stack():
         print (frame[4])
     print ("---- BOS ----")
 
-def foo ():
-    print ("in foo")
+def one():
+    print ("in one")
     print_stack()
 
-    def bar():
-        print ("in bar")
+    def two():
+        print ("in two")
         print_stack()
 
-        def baz():
-            print ("in baz")
+        def three():
+            print ("in three")
             print_stack()
 
-        baz()
-        print ("after baz")
+        three()
+        print ("after three")
         print_stack()
-    bar()
-    print ("after bar")
+    two()
+    print ("after two")
     print_stack()
 
-foo()
+one()
