@@ -1,49 +1,46 @@
+from __future__ import print_function
 import unittest
 import random
 
-main = "__main__" == __name__
+TRACE = True
 
-class selection_sort:
-  def sort(self, a):
-    if not a: return a
-    if 1 == len(a): return a
-    if main: print (a)
+def selection_sort(array):
+    if not array: return array
+    if 1 == len(array): return array
+    if TRACE: print (array)
 
-    steps = 0
-    b = a
+    copy = list(array)
     result = []
-    while 0 != len(b):
-      min = b[0]
-      index = 0
-      for i in range(1, len(b)):
-        steps += 1
-        if min > b[i]:
-          min = b[i]
-          index = i
+    while copy:
+        minimum = copy[0]
+        index = 0
+        for i in range(1, len(copy)):
+            if copy[i] < minimum:
+                minimum = copy[i]
+                index = i
 
-      result.append(b[index])
-      if main: print ("min:", min, "result:", result)
-      del b[index]
+        result.append(copy[index])
+        del copy[index]
+        if TRACE: print ("minimum:", minimum, "result:", result)
 
-    if main: print ("steps:", steps)
-    if main: print (result)
+    if TRACE: print (result)
 
     return result
 
-class test_selection_sort (unittest.TestCase):
-  def test_none(self):
-    self.assertEquals(selection_sort().sort(None), None)
-  def test_one(self):
-    self.assertEquals(selection_sort().sort([1]), [1])
-  def test_two(self):
-    self.assertEquals(selection_sort().sort([2, 1]), [1, 2])
-  def test_10(self):
-    a = range(10)
-    random.shuffle(a)
-    b = a[:]
-    b.sort()  # in place, bleah
-    self.assertEquals(selection_sort().sort(a), b)
+class TestSelectionSort(unittest.TestCase):
+    def test_none(self):
+        self.assertEquals(selection_sort(None), None)
+    def test_one(self):
+        self.assertEquals(selection_sort([1]), [1])
+    def test_two(self):
+        self.assertEquals(selection_sort([2, 1]), [1, 2])
+    def test_10(self):
+        array = range(10)
+        random.shuffle(array)
+        copy = array[:]
+        copy.sort()    # in place, bleah
+        self.assertEquals(selection_sort(array), copy)
 
-if main:
-    selection_sort().sort([9,4,2,3,6,7,1])
-    selection_sort().sort([1,2,3,4,5,6,7])
+if "__main__" == __name__:
+    selection_sort([9, 4, 2, 3, 6, 7, 1])
+    selection_sort([1, 2, 3, 4, 5, 6, 7])
