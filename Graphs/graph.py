@@ -2,7 +2,7 @@ from __future__ import print_function
 import unittest
 
 ''' A very simple graph class. Has sets of nodes and edges. '''
-class Graph:
+class Graph(object):
     def __init__(self, nodes=None, edges=None):
         self._nodes = set()
         self._edges = set()
@@ -69,7 +69,7 @@ class Graph:
 
         for vertex in self.adjacent(start):
             if vertex not in visited:
-                return self.recursive_depth_first_search(vertex,
+                return self.recursive_depth_first_search(vertex, \
                     target, visited)
 
         return None

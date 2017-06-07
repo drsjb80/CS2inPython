@@ -1,16 +1,15 @@
 from __future__ import print_function
 import unittest
 
-
-def fact(array):
+def fact(n):
     '''"Pretend" to do recursion via a stack and iteration'''
-    if array < 0: raise ValueError("Less than zero")
-    if 0 == array or 1 == array: return 1
+    if n < 0: raise ValueError("Less than zero")
+    if 0 == n or 1 == n: return 1
 
     stack = []
-    while array > 1:
-        stack.append(array)
-        array -= 1
+    while n > 1:
+        stack.append(n)
+        n -= 1
 
     result = 1
     while stack:
