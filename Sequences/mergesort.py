@@ -1,12 +1,10 @@
 from __future__ import print_function
 import unittest
 
-TRACE = True
+TRACE = False
 
 def merge(one, two):
     '''Merge two already sorted lists and return a single list.'''
-    print (one)
-    print (two)
     if not one: return two
     if not two: return one
 
@@ -40,10 +38,7 @@ def sort(array):
     if TRACE: print("result:", result)
 
     while len(result) != 1:
-        for i in range(len(result)/2):
-            result[i] = merge(result[i], result[i+1])
-            del result[i+1]
-            if TRACE: print("result:", result)
+        result.append(merge(result.pop(0), result.pop(0)))
 
     return result[0]
 
@@ -81,4 +76,4 @@ class TestSort(unittest.TestCase):
 
 if "__main__" == __name__:
     print(sort([4, 3, 2, 1]))
-    # print(sort([5, 4, 3, 2, 1]))
+    print(sort([5, 4, 3, 2, 1]))
