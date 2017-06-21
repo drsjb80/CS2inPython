@@ -1,7 +1,7 @@
 from __future__ import print_function, division
 import unittest
 
-trace = False
+trace = True
 
 def merge(one, two):
     '''Merge two already sorted lists and return a single list.'''
@@ -71,3 +71,5 @@ if '__main__' == __name__:
     trace = True
     # print((merge_sort().sort([[4], [3], [2], [1]])))
     print(sort([[5], [4], [3], [2], [1]]))
+    print(sort([5, 4, 3, 2, 1]))
+    print(sort(["This", "Is", "A", "Test"]))

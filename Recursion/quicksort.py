@@ -2,30 +2,30 @@ from __future__ import print_function
 import unittest
 import random
 
-trace = False
+TRACE = False
 
 def quick_sort(thelist):
-    if trace: print(thelist)
+    if TRACE: print('input: ', thelist)
     if not thelist: return thelist
     if 1 == len(thelist): return thelist
 
     pivot = thelist[len(thelist)-1]
 
-    gt = []
     lt = []
+    ge = []
     for i in range(len(thelist)-1):
         if thelist[i] < pivot:
             lt.append(thelist[i])
         else:
-            gt.append(thelist[i])
+            ge.append(thelist[i])
 
-    if trace: print('lt:', lt)
-    if trace: print('pivot:', pivot)
-    if trace: print('gt:', gt)
+    if TRACE: print('lt:', lt)
+    if TRACE: print('pivot:', pivot)
+    if TRACE: print('ge:', ge)
     result = []
     if lt: result += quick_sort(lt)
     result.append(pivot)
-    if gt: result += quick_sort(gt)
+    if ge: result += quick_sort(ge)
 
     return result
 
@@ -45,7 +45,7 @@ class TestQuickSort(unittest.TestCase):
         self.assertEquals(quick_sort([4, 3, 2, 1]), [1, 2, 3, 4])
 
 if "__main__" == __name__:
-    trace = True
+    TRACE = True
     a = list(range(20))
     random.shuffle(a)
     print((quick_sort(a)))
