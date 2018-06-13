@@ -1,9 +1,8 @@
-''' An implementation of the classis bubble sort. '''
-from __future__ import print_function
+''' An implementation of the classic bubble sort. '''
 import unittest
 import random
 
-Trace = True
+TRACE = True
 
 def bubble_sort(array):
     ''' A bubble sort with the usual early exit. '''
@@ -13,23 +12,23 @@ def bubble_sort(array):
     result = list(array)
     steps = 0
 
-    if Trace: print("start:", result)
+    if TRACE: print("start:", result)
 
     # we compare i and i+1 so we only go to the penultimate
     for i in range(len(result)-1):
         # swapped = False
+        if TRACE: print("starting at", i)
         for j in range(len(result)-1-i):
             steps += 1
             if result[j] > result[j+1]:
-                if Trace: print("moving", result[j], "up one")
+                if TRACE: print("    moving", result[j], "up one")
                 result[j], result[j+1] = result[j+1], result[j]
                 # swapped = True
 
-            if Trace: print("    now:", result)
-
+            if TRACE: print("        now:", result)
         # if not swapped: break
 
-    if Trace: print ("done in", steps, "steps")
+    if TRACE: print ("done in", steps, "steps")
     return result
 
 class TestBubbleSort(unittest.TestCase):
