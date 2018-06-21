@@ -1,10 +1,19 @@
+import unittest
+
 def reverse(iteratable):
-    result = type(iteratable)()
-    if iteratable == result: return result
-    if 1 == len(iteratable): return iteratable
+    if 1 == len(iteratable):
+        return iteratable
 
     return iteratable[-1:] + reverse(iteratable[1:-1]) + iteratable[:1]
 
-print reverse("hello")
-print reverse([1, 2, 3, 4, 5])
-print reverse([[1, ["one", "two"], 2], [3, 4], 5])
+class TestReverse(unittest.TestCase):
+    def test_string(self):
+        self.assertEqual(reverse("hello"), "olleh")
+    def test_list(self):
+        self.assertEqual(reverse([1, 2, 3, 4, 5]), [5, 4, 3, 2, 1])
+    def test_nested(self):
+        self.assertEqual(reverse([[1, ["one", "two"], 2], [3, 4], 5]), \
+            [5, [3, 4], [1, ['one', 'two'], 2]])
+
+if '__main__' == __name__:
+    unittest.main()
